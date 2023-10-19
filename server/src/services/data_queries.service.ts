@@ -147,6 +147,7 @@ export class DataQueriesService {
         }
       );
     } catch (api_error) {
+      console.log('api_error', { api_error, name: api_error.constructor.name });
       if (api_error.constructor.name === 'OAuthUnauthorizedClientError') {
         const currentUserToken = sourceOptions['refresh_token']
           ? sourceOptions
@@ -223,7 +224,8 @@ export class DataQueriesService {
               app: { id: app?.id, isPublic: app?.isPublic },
             }
           );
-        } else if (dataSource.kind === 'restapi' || dataSource.kind === 'openapi') {
+        } else if (dataSource.kind === 'restapi' || dataSource.kind === 'openapi' || dataSource.kind === 'graphql') {
+          console.log('need oauth');
           return {
             status: 'needs_oauth',
             data: {

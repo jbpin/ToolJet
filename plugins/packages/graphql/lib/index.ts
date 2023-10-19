@@ -113,7 +113,7 @@ export default class GraphqlQueryService implements QueryService {
       variables: variables ? JSON.parse(variables) : {},
     };
 
-    let result = {};
+    let result: any = {};
 
     try {
       const requestOptions: OptionsOfTextResponseBody = {
@@ -129,6 +129,12 @@ export default class GraphqlQueryService implements QueryService {
       }
       const response = await this.sendRequest(url, requestOptions);
       result = JSON.parse(response.body);
+      if (result?.errors?.find((e) => e.extensions?.code === 'UNAUTHENTICATED') != null) {
+        return {
+          status: 'needs_oauth',
+          data: { auth_url: this.authUrl(sourceOptions) },
+        };
+      }
     } catch (error) {
       if (requiresOauth && error?.response?.statusCode == 401) {
         throw new OAuthUnauthorizedClientError('Unauthorized status from API server', error.message, result);
