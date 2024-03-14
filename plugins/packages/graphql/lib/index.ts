@@ -64,11 +64,17 @@ export default class GraphqlQueryService implements QueryService {
     if (status === 'needs_oauth') return authValidatedRequestOptions;
     const requestOptions = data as OptionsOfTextResponseBody;
 
-    let result = {};
+    let result: any = {};
 
     try {
       const response = await this.sendRequest(url, requestOptions);
       result = JSON.parse(response.body);
+      if (result?.errors?.find((e) => e.extensions?.code === 'UNAUTHENTICATED') != null) {
+        return {
+          status: 'needs_oauth',
+          data: { auth_url: this.authUrl(sourceOptions) },
+        };
+      }
     } catch (error) {
       console.error(
         `Error while calling GraphQL end point. status code: ${error?.response?.statusCode} message: ${error?.response?.body}`
